@@ -65,9 +65,7 @@ def read_message():
     """
     Read messages from the webapp.
     """
-    #url = "abc"
     logger.info('kget-integrator is reading the message')
-    #subprocess.Popen([ "/bin/bash", "-i", "-c", "kget "+url], creationflags=creation_flags).wait()
 
     while 1:
         # Read the message length (first 4 bytes).

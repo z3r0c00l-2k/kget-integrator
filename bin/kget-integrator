@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+
+# kget-integrator is a tool to integrate KGet Download manager
+# with Google Chrome, Chromium, Vivaldi and Opera in Linux.
+
+# Copyright (C) 2016  Gobinath
+
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# sudo apt install python3-urllib3
+import struct
+import sys
+import threading
+import logging
+import json
+import urllib
+import subprocess
+import tempfile
+from urllib.parse import urlparse
+from urllib.parse import unquote
+from urllib.request import urlopen
+from os.path import splitext, basename, join, expanduser
+from mimetypes import guess_extension
+
+
+KGET_COMMAND = "kget "
+VERSION = "0.1"
+creation_flags = 0
+
+logger = logging.getLogger()
+log_file_path = join(expanduser('~'), 'kget-integrator.log')
+logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
+logger.propagate = False
+
+
+
+def send_message(message):
+    """
+    Send a message to the webapp.
+    """
+    logger.info('Sending message: ' + str(message))
+    try:
+        # Write message size.
+        sys.stdout.buffer.write(struct.pack('I', len(message)))
+        # Write the message itself.
+        sys.stdout.write(message)
+        sys.stdout.flush()
+    except Exception as e:
+        logger.error('Error in sending message: ' + str(e))
+
+
+def read_message():
+    """
+    Read messages from the webapp.
+    """
+    #url = "abc"
+    logger.info('kget-integrator is reading the message')
+    #subprocess.Popen([ "/bin/bash", "-i", "-c", "kget "+url], creationflags=creation_flags).wait()
+
+    while 1:
+        # Read the message length (first 4 bytes).
+        text_length_bytes = sys.stdin.buffer.read(4)
+
+        # Unpack message length as 4 byte integer.
+        text_length = struct.unpack('i', text_length_bytes)[0]
+
+        logger.debug('Message length: ' + str(text_length))
+
+        # Read the text (JSON object) of the message.
+        text = sys.stdin.buffer.read(text_length).decode('utf-8')
+
+        logger.debug('Received message: ' + str(text))
+
+        if text:
+            if not 'url' in text:
+                logger.debug('YO its URL')
+                kget_version = subprocess.Popen(
+                    ["kget --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
+                kget_version = kget_version.replace('kget', '').strip()
+                logger.debug('KGet version: ' + kget_version)
+                send_message('{"Status": "Available", "version": "' +
+                             VERSION + '", "kget": "' + kget_version + '"}')
+                return
+
+            send_message('{"Status": "Available", "version": "' + VERSION + '", "kget": ""}')
+            logger.debug('parsing json')
+            data = json.loads(text)
+            logger.debug('fetching url')
+            url = data['url']
+            if url != "":
+                logger.debug('url is ' + str(url))
+                logger.debug('Execute command')
+                # Pass the parameters to KGET
+                subprocess.Popen([ "/bin/bash", "-i", "-c", "kget "+url], creationflags=creation_flags).wait()
+            sys.exit(0)
+
+
+if __name__ == '__main__':
+    read_message()

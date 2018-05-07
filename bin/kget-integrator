@@ -40,8 +40,9 @@ VERSION = "0.1"
 creation_flags = 0
 
 logger = logging.getLogger()
-log_file_path = join(expanduser('~'), 'kget-integrator.log')
-logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
+#uncomment the following lines to debug the script
+#log_file_path = join(expanduser('~'), 'kget-integrator.log')
+#logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
 logger.propagate = False
 
 
@@ -83,7 +84,6 @@ def read_message():
 
         if text:
             if not 'url' in text:
-                logger.debug('YO its URL')
                 kget_version = subprocess.Popen(
                     ["kget --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
                 kget_version = kget_version.replace('kget', '').strip()

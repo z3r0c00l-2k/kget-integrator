@@ -35,7 +35,7 @@ from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 
-KGET_COMMAND = "kget "
+KGET_COMMAND = "kget"
 VERSION = "0.1"
 creation_flags = 0
 
@@ -85,7 +85,7 @@ def read_message():
         if text:
             if not 'url' in text:
                 kget_version = subprocess.Popen(
-                    ["kget --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
+                    [KGET_COMMAND + " --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
                 kget_version = kget_version.replace('kget', '').strip()
                 logger.debug('KGet version: ' + kget_version)
                 send_message('{"Status": "Available", "version": "' +
@@ -96,12 +96,14 @@ def read_message():
             logger.debug('parsing json')
             data = json.loads(text)
             logger.debug('fetching url')
+            command = [KGET_COMMAND]
             url = data['url']
+            command.append(url)
             if url != "":
                 logger.debug('url is ' + str(url))
                 logger.debug('Execute command')
                 # Pass the parameters to KGET
-                subprocess.Popen([ "/bin/bash", "-i", "-c", "kget "+url], creationflags=creation_flags).wait()
+                subprocess.Popen(command, creationflags=creation_flags).wait()
             sys.exit(0)
 
 

@@ -19,7 +19,7 @@
 {
     "name": "com.hell.kgetchromewrapper",
     "description": "Integrate KGet with Google Chrome, Chromium",
-    "path": "/usr/bin/kget-integrator",
+    "path": "/usr/local/libexec/kget-integrator",
     "type": "stdio",
     "allowed_origins": [
         "chrome-extension://hafhidoddeamgipiienbmfllacpdmogj/"

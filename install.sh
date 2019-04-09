@@ -1,11 +1,11 @@
 #!/bin/sh
 echo "Installing kget-integrator"
 
-# copying kget-integrator to /usr/bin/kget-integrator
-sudo cp bin/kget-integrator /usr/bin/kget-integrator
+# copying kget-integrator to /usr/local/libexec/kget-integrator
+sudo cp bin/kget-integrator /usr/local/libexec/kget-integrator
 
 # Adding execute permissoion to kget-integrator
-sudo chmod +x /usr/bin/kget-integrator
+sudo chmod +x /usr/local/libexec/kget-integrator
 
 #Creating directory for native messaging host configuration
 sudo mkdir -p /etc/opt/chrome/native-messaging-hosts
